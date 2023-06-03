@@ -24,8 +24,9 @@ typedef struct __attribute__((__packed__)) {
 } BmpHeader;                   // 54 bytes
 
 typedef struct {
-    BmpHeader header;          // File header
-    uint8_t *pixels;           // Image pixels
+    BmpHeader header;          // File header (54 bytes)
+    uint8_t *metadata;         // Image metadata (header.offset - 54 bytes)
+    uint8_t *pixels;           // Image pixels (header.fileSize - header.offset = header.width x header.height x (header.bitCount / 8) bytes)
 } BmpImage;
 
 BmpImage *bmpRead(const char *filename);

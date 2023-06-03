@@ -8,11 +8,13 @@ int main(int argc, char *argv[]) {
         return 0;
     }
 
+    // Test bmpRead
     BmpImage *image = bmpRead(argv[1]);
 
-    printf("type: %d\n", image->header.type);
-    printf("imageSize: %d x %d\n", image->header.width, image->header.height);
-    printf("image offset: %d\n", image->header.offset);
+    // Test bmpWrite
+    bmpWrite("images/test.bmp", image);
+    BmpImage *testImg = bmpRead("images/test.bmp");
 
+    bmpFree(testImg);
     bmpFree(image);
 }
