@@ -12,6 +12,7 @@ BmpImage *bmpRead(const char *filename) {
 
     BmpImage *bmpImage = malloc(sizeof(BmpImage));
 
+    // Read BMP header
     if (fread(&bmpImage->header, sizeof(BmpHeader), 1, file) != 1) {
         fclose(file);
         bmpFree(bmpImage);
@@ -22,12 +23,14 @@ BmpImage *bmpRead(const char *filename) {
 
     bmpImage->pixels = malloc(sizeof(uint8_t) * pixelSize);
 
+    // Skip to pixel data
     if (fseek(file, bmpImage->header.offset, SEEK_SET) != 0) {
         fclose(file);
         bmpFree(bmpImage);
         handleError("fseek");
     }
 
+    // Read BMP pixel data
     if (fread(bmpImage->pixels, sizeof(uint8_t), pixelSize, file) != pixelSize) {
         fclose(file);
         bmpFree(bmpImage);
