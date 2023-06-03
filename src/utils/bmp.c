@@ -1,8 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "./include/common.h"
-#include "./include/bmp.h"
+#include "../include/common.h"
+#include "../include/bmp.h"
 
 BmpImage *bmpRead(const char *filename) {
     FILE *file = fopen(filename, "rb"); // Opens file in binary read mode  
