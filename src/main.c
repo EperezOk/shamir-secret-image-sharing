@@ -2,6 +2,7 @@
 
 #include "./include/bmp.h"
 #include "./include/modular_arithmetic.h"
+#include "./include/polynomials.h"
 
 int main(int argc, char *argv[]) {
     if (argc < 2) {
@@ -29,4 +30,19 @@ int main(int argc, char *argv[]) {
     printf("a / b = %d\n", zDiv(a, b));
     printf("inv(a) = %d\n", inv(a));
     printf("inv(b) = %d\n", inv(b));
+
+    // Test polynomial interpolation: P(x) = x^2 + 1
+    uint32_t x[] = {0, 1, 2};
+    uint32_t y[] = {1, 2, 5};
+
+    Polynomial *polynomial = interpolate(x, y, 3);
+
+    for (int i = 0; i < polynomial->degree + 1; i++) {
+        printf("Coefficient a_%d=%d\n", i, polynomial->coefficients[i]);
+    }
+    printf("P(1)=%d\n", evaluate(polynomial, 1));
+    printf("P(5)=%d\n", evaluate(polynomial, 5));
+    printf("P(2)=%d\n", evaluate(polynomial, 2));
+
+    freePolynomial(polynomial);
 }

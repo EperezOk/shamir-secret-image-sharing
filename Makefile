@@ -14,6 +14,6 @@ $(TARGET): $(OBJECTS) $(OBJECTS_UTILS)
 	$(CC) $(CFLAGS) $^ -o $@
 
 clean:
-	rm -rf $(OBJECTS) $(TARGET)
+	rm -rf $(OBJECTS) $(OBJECTS_UTILS) $(TARGET)
 
 .PHONY: all clean

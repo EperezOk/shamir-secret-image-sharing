@@ -7,7 +7,7 @@ uint32_t zAdd(uint32_t a, uint32_t b) {
 }
 
 uint32_t zSub(uint32_t a, uint32_t b) {
-    return (a - b + P) % P; // make sure result is positive
+    return zPos(a - b);
 }
 
 uint32_t zMul(uint32_t a, uint32_t b) {
@@ -17,10 +17,11 @@ uint32_t zMul(uint32_t a, uint32_t b) {
 uint32_t inv(uint32_t a) {
     int32_t x, y;
     gcdExtended(a, P, &x, &y); // gcd = a*x + P*y = 1 (mod P)
+    return zPos(x); // make sure x is positive
+}
 
-    // Make sure x is positive
-    uint32_t inverse = (x % P + P) % P;
-    return inverse;
+uint32_t zPos(int32_t a) {
+    return (a % P + P) % P;
 }
 
 uint32_t zDiv(uint32_t a, uint32_t b) {
