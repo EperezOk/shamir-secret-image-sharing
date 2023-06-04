@@ -10,17 +10,20 @@ int main(int argc, char *argv[]) {
         return 0;
     }
 
-    // Test bmpRead
+    // Test BMP
+    printf("\n\n----- BMP TESTS -----\n");
     BmpImage *image = bmpRead(argv[1]);
 
-    // Test bmpWrite
     bmpWrite("images/test.bmp", image);
     BmpImage *testImg = bmpRead("images/test.bmp");
 
     bmpFree(testImg);
     bmpFree(image);
 
+
     // Test modular arithmetic
+    printf("\n\n----- MODULAR ARITHMETIC TESTS -----\n");
+
     uint32_t a = 127;
     uint32_t b = 210;
 
@@ -31,18 +34,49 @@ int main(int argc, char *argv[]) {
     printf("inv(a) = %d\n", inv(a));
     printf("inv(b) = %d\n", inv(b));
 
-    // Test polynomial interpolation: P(x) = x^2 + 1
-    uint32_t x[] = {0, 1, 2};
-    uint32_t y[] = {1, 2, 5};
 
+    // Test polynomials
+    printf("\n\n----- POLYNOMIALS TESTS -----\n");
+
+    Polynomial *p1 = newPolynomial(2); // P(x) = 3x^2 + 2x + 1
+    p1->coefficients[0] = 1;
+    p1->coefficients[1] = 2;
+    p1->coefficients[2] = 3;
+    Polynomial *p2 = newPolynomial(1); // Q(x) = 5x + 4
+    p2->coefficients[0] = 4;
+    p2->coefficients[1] = 5;
+
+    printf("p1(x) = ");
+    printPolynomial(p1);
+    printf("p2(x) = ");
+    printPolynomial(p2);
+
+    printf("p3(x) = p1(x) + p2(x) = ");
+    // P(x) + Q(x) = 3x^2 + 7x + 5 (mod 11)
+    Polynomial *p3 = polyAdd(p1, p2);
+    printPolynomial(p3);
+
+    printf("p4(x) = p1(x) x p2(x) = ");
+    // P(x) * Q(x) = 15x^3 + 22x^2 + 13x + 4
+    // P(x) * Q(x) = 4x^3 + 0x^2 + 2x + 4 (mod 11)
+    Polynomial *p4 = polyMul(p1, p2);
+    printPolynomial(p4);
+
+    mulByScalar(p4, 3);
+    printf("3 * p4(x) = ");
+    printPolynomial(p4); // 1x^3 + 0x^2 + 6x + 1 (mod 11)
+
+    uint32_t x[] = {1, 5, 2};
+    uint32_t y[] = {3, 10, 9};
+
+    // P(x) = 5x^2 + 2x + 7 (mod 11)
     Polynomial *polynomial = interpolate(x, y, 3);
-
-    for (int i = 0; i < polynomial->degree + 1; i++) {
-        printf("Coefficient a_%d=%d\n", i, polynomial->coefficients[i]);
-    }
-    printf("P(1)=%d\n", evaluate(polynomial, 1));
-    printf("P(5)=%d\n", evaluate(polynomial, 5));
-    printf("P(2)=%d\n", evaluate(polynomial, 2));
+    printf("P(x) = ");
+    printPolynomial(polynomial);
 
     freePolynomial(polynomial);
+    freePolynomial(p1);
+    freePolynomial(p2);
+    freePolynomial(p3);
+    freePolynomial(p4);
 }

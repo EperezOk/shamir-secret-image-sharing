@@ -14,9 +14,17 @@ Polynomial* newPolynomial(uint8_t degree);
 
 uint32_t evaluate(Polynomial *polynomial, uint32_t x);
 
-// Interpolate a polynomial of degree k - 1 through the k points (x[i], y[i])
+void mulByScalar(Polynomial* polynomial, uint32_t scalar);
+
+Polynomial* polyAdd(Polynomial* p1, Polynomial* p2);
+
+Polynomial* polyMul(Polynomial* p1, Polynomial* p2);
+
+// Interpolate a polynomial of degree k - 1 through k points (x[i], y[i])
 Polynomial* interpolate(uint32_t* x, uint32_t* y, uint8_t k);
 
 void freePolynomial(Polynomial* p);
+
+void printPolynomial(Polynomial* p);
 
 #endif
