@@ -1,19 +1,26 @@
 include ./src/include/Makefile.inc
 
+# Reference: https://stackoverflow.com/questions/52034997/how-to-make-makefile-recompile-when-a-header-file-is-changed
+
 TARGET = ss
 
-SOURCES := $(wildcard ./src/*.c)
-SOURCES_UTILS := $(wildcard ./src/utils/*.c)
+SOURCES := $(wildcard ./src/*.c) $(wildcard ./src/utils/*.c)
 
 OBJECTS := $(SOURCES:.c=.o)
-OBJECTS_UTILS := $(SOURCES_UTILS:.c=.o)
+
+DEPENDS := $(SOURCES:.c=.d)
 
 all: $(TARGET)
 
-$(TARGET): $(OBJECTS) $(OBJECTS_UTILS)
+$(TARGET): $(OBJECTS)
 	$(CC) $(CFLAGS) $^ -o $@
 
+-include $(DEPENDS)
+
+%.o: %.c Makefile
+	$(CC) $(CFLAGS) -MMD -MP -c $< -o $@
+
 clean:
-	rm -rf $(OBJECTS) $(OBJECTS_UTILS) $(TARGET)
+	rm -rf $(TARGET) $(OBJECTS) $(DEPENDS)
 
 .PHONY: all clean
