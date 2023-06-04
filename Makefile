@@ -18,6 +18,6 @@ $(TARGET): $(OBJECTS)
 	$(CC) $(CFLAGS) -MMD -MP -c $< -o $@
 
 clean:
-	rm -rf $(TARGET) $(OBJECTS) $(DEPENDS)
+	$(RM) $(TARGET) $(OBJECTS) $(DEPENDS)
 
 .PHONY: all clean
