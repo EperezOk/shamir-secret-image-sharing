@@ -29,7 +29,7 @@ $(OBJDIR):
 $(TESTBINDIR):
 	mkdir -p $@
 
-test: $(TESTBINS)
+test: $(TARGET) $(TESTBINS)
 	@for test in $(TESTBINS); do \
 		$$test --verbose; \
 	done
