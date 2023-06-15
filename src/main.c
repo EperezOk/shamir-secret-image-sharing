@@ -4,9 +4,10 @@
 #include <time.h>
 
 #include "./include/shadows.h"
+#include "./include/bmp.h"
 
 int main(int argc, char *argv[]) {
-    if (argc < 3) {
+    if (argc < 4) {
         printf("Missing arguments\n");
         return 0;
     }
@@ -21,6 +22,17 @@ int main(int argc, char *argv[]) {
         exit(EXIT_FAILURE);
     }
 
+    // Embed the shadows in the images
     uint8_t **shadows = generateShadows(bmpFile, k);
+    InsertionMode insertionMode = k < 5 ? LSB4 : LSB2;
+
+    printf("Amount of arguments %d\n", argc);
+    
+    for (uint32_t i = 0; i < N; i++) {
+        char *targetImage = argv[3+i];
+        printf("Embedding file: %s\n", targetImage);
+        embedShadow(targetImage, insertionMode, shadows[i], i + 1);
+    }
+
     freeShadows(shadows);
 }

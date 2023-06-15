@@ -3,6 +3,11 @@
 
 #include <stdint.h>
 
+typedef enum {
+    LSB2,
+    LSB4,
+} InsertionMode;
+
 // Use __attribute__((__packed__)) to prevent the compiler from adding padding between struct fields
 typedef struct __attribute__((__packed__)) {
     uint16_t type;             // Magic number that identifies the file type
@@ -34,5 +39,7 @@ BmpImage *bmpRead(const char *filename);
 void bmpWrite(const char *filename, BmpImage *image);
 
 void bmpFree(BmpImage *image);
+
+void embedShadow(const char *imagePath, InsertionMode mode, uint8_t *shadow, uint16_t shadowNumber);
 
 #endif

@@ -79,3 +79,37 @@ void bmpFree(BmpImage *image) {
     free(image->pixels);
     free(image);
 }
+
+void embedShadow(const char *imagePath, InsertionMode mode, uint8_t *shadow, uint16_t shadowNumber) {
+    BmpImage *image = bmpRead(imagePath);
+    
+    uint32_t pixelSize = image->header.width * image->header.height;
+    uint32_t pixelCount = pixelSize * (image->header.bitCount / 8);
+    uint8_t shadowBitIndex = 0;
+    uint8_t shadowByteIndex = 0;
+
+    for (uint32_t i = 0; i < pixelCount; i++) {
+        if (shadowBitIndex == 8) {
+            shadowBitIndex = 0;
+            shadowByteIndex++;
+        }
+
+        if (mode == LSB2) {
+            image->pixels[i] &= 0xFC; // 0xFC = 0b11111100
+            // Shift the shadow bits to the right, so that the 2 LSBs are the bits we want to embed
+            image->pixels[i] |= (shadow[shadowByteIndex] >> (6-shadowBitIndex)) & 0x03;
+            shadowBitIndex += 2;
+        } else if (mode == LSB4) {
+            image->pixels[i] &= 0xF0; // 0xF0 = 0b11110000
+            // Shift the shadow bits to the right, so that the 4 LSBs are the bits we want to embed
+            image->pixels[i] |= (shadow[shadowByteIndex] >> (4-shadowBitIndex)) & 0x0F;
+            shadowBitIndex += 4;
+        }
+    }
+
+    image->header.reserved1 = shadowNumber;
+
+    bmpWrite(imagePath, image);
+
+    bmpFree(image);
+}
