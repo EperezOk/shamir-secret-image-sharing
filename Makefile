@@ -10,7 +10,7 @@ DEPENDS := $(SOURCES:.c=.d)
 all: $(TARGET)
 
 $(TARGET): $(OBJECTS)
-	$(CC) $(CFLAGS) $^ -o $@
+	$(CC) $(CFLAGS) $^ -o $@ -lm
 
 -include $(DEPENDS)
 
