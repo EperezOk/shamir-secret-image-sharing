@@ -1,23 +1,41 @@
 include ./src/include/Makefile.inc
 
-# Reference: https://stackoverflow.com/questions/52034997/how-to-make-makefile-recompile-when-a-header-file-is-changed
+# Reference: https://stackoverflow.com/questions/52034997/how-to-make-makefile-recompile-when-a-header-file-is-changed and ChatGPT
 
-TARGET = ss
-SOURCES := $(wildcard ./src/*.c) $(wildcard ./src/utils/*.c)
-OBJECTS := $(SOURCES:.c=.o)
-DEPENDS := $(SOURCES:.c=.d)
+SOURCES := $(wildcard $(SRCDIR)/*.c) $(wildcard $(SRCDIR)/utils/*.c)
+OBJECTS := $(patsubst $(SRCDIR)/%.c, $(OBJDIR)/%.o, $(SOURCES))
+DEPENDS := $(patsubst $(SRCDIR)/%.c, $(OBJDIR)/%.d, $(SOURCES))
+
+TESTS := $(wildcard $(TESTDIR)/*.c)
+TEST_OBJECTS := $(filter-out $(OBJDIR)/main.o, $(OBJECTS))
+TESTBINS := $(patsubst $(TESTDIR)/%.c, $(TESTBINDIR)/%, $(TESTS))
 
 all: $(TARGET)
 
 $(TARGET): $(OBJECTS)
-	$(CC) $(CFLAGS) $^ -o $@ -lm
+	$(CC) $(CFLAGS) $^ -o $@ $(LIBS)
 
 -include $(DEPENDS)
 
-%.o: %.c Makefile
+$(OBJDIR)/%.o: $(SRCDIR)/%.c Makefile | $(OBJDIR)
 	$(CC) $(CFLAGS) -MMD -MP -c $< -o $@
 
-clean:
-	$(RM) $(TARGET) $(OBJECTS) $(DEPENDS)
+$(TESTBINDIR)/%: $(TESTDIR)/%.c | $(TESTBINDIR)
+	$(CC) $(CFLAGS) $< $(TEST_OBJECTS) -o $@ $(TESTLIBS)
 
-.PHONY: all clean
+$(OBJDIR):
+	mkdir -p $(dir $(OBJECTS))
+
+$(TESTBINDIR):
+	mkdir -p $@
+
+test: $(TESTBINS)
+	@for test in $(TESTBINS); do \
+		$$test --verbose; \
+	done
+
+clean:
+	$(RM) $(TARGET) $(OBJECTS) $(DEPENDS) $(TESTBINS)
+	$(RM) -r $(OBJDIR)
+
+.PHONY: all clean 
