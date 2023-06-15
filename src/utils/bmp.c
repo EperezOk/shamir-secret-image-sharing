@@ -1,8 +1,10 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "../include/common.h"
 #include "../include/bmp.h"
+#include "../include/polynomials.h"
 
 BmpImage *bmpRead(const char *filename) {
     FILE *file = fopen(filename, "rb"); // Opens file in binary read mode  
@@ -111,5 +113,32 @@ void embedShadow(const char *imagePath, InsertionMode mode, uint8_t *shadow, uin
 
     bmpWrite(imagePath, image);
 
+    bmpFree(image);
+}
+
+
+void createImageWithFunctions(char *imagePath, Polynomial *f[], Polynomial *g[], uint32_t t, uint8_t k) {
+    BmpImage *image = bmpRead(imagePath);
+
+    // Create block i and write to image
+    for (uint32_t i = 0; i < t; i++) {
+        uint8_t blockSize = 2 * k - 2;
+        uint8_t *block = malloc(sizeof(uint8_t) * blockSize);
+        // save a_i in block
+        for (uint8_t j = 0; j < k; j++) {
+            block[j] = f[i]->coefficients[j];
+        }
+
+        // save b_i in block
+        for (uint8_t j = 2; j < k; j++) {
+            block[j - 2 + k] = g[i]->coefficients[j]; // ignore b0 and b1
+        }
+
+        memcpy(image->pixels + i * blockSize, block, blockSize);
+
+        free(block);
+    }
+
+    bmpWrite(imagePath, image);
     bmpFree(image);
 }

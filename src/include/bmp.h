@@ -3,6 +3,8 @@
 
 #include <stdint.h>
 
+#include "./polynomials.h"
+
 typedef enum {
     LSB2,
     LSB4,
@@ -37,6 +39,8 @@ typedef struct {
 BmpImage *bmpRead(const char *filename);
 
 void bmpWrite(const char *filename, BmpImage *image);
+
+void createImageWithFunctions(char *image, Polynomial *f[], Polynomial *g[], uint32_t t, uint8_t k);
 
 void bmpFree(BmpImage *image);
 
