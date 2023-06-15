@@ -9,8 +9,8 @@
 #include "./include/bmp.h"
 
 int main(int argc, char *argv[]) {
-    if (argc < 4) {
-        printf("Missing arguments\n");
+    if (argc != 4) {
+        printf("Usage: %s BmpPath k BmpEmbedDirectory \n", argv[0]);
         return 0;
     }
 
