@@ -25,7 +25,7 @@ int main(int argc, char *argv[]) {
     char *bmpDirPath = argv[4];
 
     if (k < 3 || k > 8) {
-        fprintf(stderr, "error: k must be in [3, 8]\n");
+        fprintf(stderr, "Error: k must be in [3, 8]\n");
         exit(EXIT_FAILURE);
     }
 
@@ -53,7 +53,7 @@ void imageReconstruction(char *secretImagePath, uint8_t k, char *bmpDirPath) {
     }
 
     BmpImage *secretImage;
-    uint8_t initialized = 0;
+    bool initialized = false;
     uint32_t t; // amount of sub-shadows per shadow
 
     InsertionMode insertionMode = k < 5 ? LSB4 : LSB2;
@@ -72,7 +72,7 @@ void imageReconstruction(char *secretImagePath, uint8_t k, char *bmpDirPath) {
 
             // Initialize the secret image with one of the bmp files
             if (!initialized) {
-                initialized = 1;
+                initialized = true;
                 secretImage = bmpRead(path);
                 t = (secretImage->header.fileSize - secretImage->header.offset) / (2*k - 2);
             }
@@ -106,23 +106,13 @@ void imageReconstruction(char *secretImagePath, uint8_t k, char *bmpDirPath) {
         g[i/2] = interpolate(x, d, k);
     }
 
-    // TODO: cheating, not sure how to do the division between a_i_j and b_i_j,
-    // for (uint32_t i = 0; i < t ; i++) {
-    //     uint32_t a_i_0 = f[i]->coefficients[0];
-    //     uint32_t b_i_0 = g[i]->coefficients[0];
-    //     uint32_t a_i_1 = f[i]->coefficients[1];
-    //     uint32_t b_i_1 = g[i]->coefficients[1];
-
-    //     // ri exists only if a_i_0 can be divided by b_i_0 
-    //     if (zPos(-b_i_0) % a_i_0 != 0 || zPos(-b_i_1) % a_i_1 != 0) {
-    //         printf("CHEATING!\n");
-    //         exit(EXIT_FAILURE);
-    //     }
-    // }
-
     // Recover the secret and dump it to the destination file
-    recoverSecretImage(secretImage, f, g, t, k);
-    bmpWrite(secretImagePath, secretImage);
+    bool cheatingDetected = recoverSecretImage(secretImage, f, g, t, k);
+
+    if (!cheatingDetected)
+        bmpWrite(secretImagePath, secretImage);
+    else
+        printf("Error: cheating detected\n");
 
     // Free resources
     for (uint32_t i = 0; i < t; i++) {

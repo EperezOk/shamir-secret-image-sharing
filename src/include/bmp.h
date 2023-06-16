@@ -2,6 +2,7 @@
 #define BMP_H
 
 #include <stdint.h>
+#include <stdbool.h>
 
 #include "./polynomials.h"
 
@@ -47,6 +48,7 @@ void embedShadow(const char *imagePath, InsertionMode mode, uint8_t *shadow, uin
 // Extract all the sub-shadows v_ij from a BMP image
 uint8_t* extractSubShadows(const char *imagePath, InsertionMode insertionMode, uint32_t t, uint16_t *shadowNumber);
 
-void recoverSecretImage(BmpImage *imagePath, Polynomial *f[], Polynomial *g[], uint32_t t, uint8_t k);
+// Recover the secret image from `f` and `g` polynomials, and indicate whether cheaters were detected or not
+bool recoverSecretImage(BmpImage *imagePath, Polynomial *f[], Polynomial *g[], uint32_t t, uint8_t k);
 
 #endif

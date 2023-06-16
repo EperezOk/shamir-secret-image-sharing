@@ -5,6 +5,7 @@
 #include "../include/common.h"
 #include "../include/bmp.h"
 #include "../include/polynomials.h"
+#include "../include/modular_arithmetic.h"
 
 BmpImage *bmpRead(const char *filename) {
     FILE *file = fopen(filename, "rb"); // Opens file in binary read mode  
@@ -165,12 +166,23 @@ uint8_t* extractSubShadows(const char *imagePath, InsertionMode insertionMode, u
     return subShadows;
 }
 
-void recoverSecretImage(BmpImage *image, Polynomial *f[], Polynomial *g[], uint32_t t, uint8_t k) {
+bool recoverSecretImage(BmpImage *image, Polynomial *f[], Polynomial *g[], uint32_t t, uint8_t k) {
     uint8_t blockSize = 2 * k - 2;
     uint8_t block[blockSize];
 
     // Reconstruct each of the t blocks B_i
     for (uint32_t i = 0; i < t; i++) {
+        // Cheating detection
+        uint8_t a0 = f[i]->coefficients[0];
+        uint8_t a1 = f[i]->coefficients[1];
+        uint8_t b0 = g[i]->coefficients[0];
+        uint8_t b1 = g[i]->coefficients[1];
+
+        uint8_t r0 = zDiv(zPos(-b0), a0);
+        uint8_t r1 = zDiv(zPos(-b1), a1);
+
+        if (r0 != r1)
+            return true; // cheating detected
 
         // Recover a_i
         for (uint8_t j = 0; j < k; j++)
@@ -183,4 +195,6 @@ void recoverSecretImage(BmpImage *image, Polynomial *f[], Polynomial *g[], uint3
         // Embed block in image
         memcpy(image->pixels + i*blockSize, block, blockSize);
     }
+
+    return false; // no cheating detected
 }
