@@ -83,15 +83,14 @@ void bmpFree(BmpImage *image) {
     free(image);
 }
 
-void embedShadow(const char *imagePath, InsertionMode mode, uint8_t *shadow, uint16_t shadowNumber) {
+void embedShadow(const char *imagePath, InsertionMode mode, uint8_t *shadow, uint16_t shadowNumber, uint32_t t) {
     BmpImage *image = bmpRead(imagePath);
     
-    uint32_t pixelSize = image->header.width * image->header.height;
-    uint32_t pixelCount = pixelSize * (image->header.bitCount / 8);
+    uint32_t pixelsUsed = 2*t * (mode == LSB2 ? 4 : 2);
     uint8_t shadowBitIndex = 0;
-    uint8_t shadowByteIndex = 0;
+    uint32_t shadowByteIndex = 0;
 
-    for (uint32_t i = 0; i < pixelCount; i++) {
+    for (uint32_t i = 0; i < pixelsUsed; i++) {
         if (shadowBitIndex == 8) {
             shadowBitIndex = 0;
             shadowByteIndex++;
@@ -178,8 +177,8 @@ bool recoverSecretImage(BmpImage *image, Polynomial *f[], Polynomial *g[], uint3
         uint8_t b0 = g[i]->coefficients[0];
         uint8_t b1 = g[i]->coefficients[1];
 
-        uint8_t r0 = zDiv(zPos(-b0), a0);
-        uint8_t r1 = zDiv(zPos(-b1), a1);
+        uint8_t r0 = zDiv(zPos(-b0), a0 == 0 ? 1 : a0);
+        uint8_t r1 = zDiv(zPos(-b1), a1 == 0 ? 1 : a1);
 
         if (r0 != r1)
             return true; // cheating detected

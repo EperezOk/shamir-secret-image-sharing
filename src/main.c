@@ -127,7 +127,9 @@ void imageReconstruction(char *secretImagePath, uint8_t k, char *bmpDirPath) {
 void shadowGeneration(char *bmpFile, uint8_t k, char *bmpDirPath) {
     srand(time(NULL)); // seed the random number generator
 
-    uint8_t **shadows = generateShadows(bmpFile, k);
+    uint32_t t; // amount of sub-shadows per shadow
+
+    uint8_t **shadows = generateShadows(bmpFile, k, &t);
     InsertionMode insertionMode = k < 5 ? LSB4 : LSB2;
 
     DIR* bmpDir;
@@ -149,7 +151,7 @@ void shadowGeneration(char *bmpFile, uint8_t k, char *bmpDirPath) {
             char path[257];
             snprintf(path, sizeof(path), "%s/%s", bmpDirPath, filePath->d_name);
             
-            embedShadow(path, insertionMode, shadows[i], i + 1);
+            embedShadow(path, insertionMode, shadows[i], i + 1, t);
             i++;
         }
     }

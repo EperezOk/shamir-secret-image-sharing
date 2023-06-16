@@ -83,6 +83,5 @@ settings.json
 strace_out
 
 # Test files
-images/test.bmp
-
-covers/
+*.bmp
+!images/*.bmp

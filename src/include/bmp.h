@@ -43,7 +43,7 @@ void bmpWrite(const char *filename, BmpImage *image);
 
 void bmpFree(BmpImage *image);
 
-void embedShadow(const char *imagePath, InsertionMode mode, uint8_t *shadow, uint16_t shadowNumber);
+void embedShadow(const char *imagePath, InsertionMode mode, uint8_t *shadow, uint16_t shadowNumber, uint32_t t);
 
 // Extract all the sub-shadows v_ij from a BMP image
 uint8_t* extractSubShadows(const char *imagePath, InsertionMode insertionMode, uint32_t t, uint16_t *shadowNumber);
