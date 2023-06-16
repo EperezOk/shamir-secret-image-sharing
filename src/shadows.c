@@ -64,6 +64,12 @@ uint8_t** generateShadows(char *bmpFile, uint8_t k) {
     return shadows;
 }
 
+void freeSubShadows(uint8_t **subShadows, uint8_t k) {
+    for (uint32_t i = 0; i < k; i++)
+        free(subShadows[i]);
+    free(subShadows);
+}
+
 void freeShadows(uint8_t **shadows) {
     for (uint32_t i = 0; i < N; i++)
         free(shadows[i]);

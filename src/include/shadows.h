@@ -3,10 +3,14 @@
 
 #include <stdint.h>
 
+#include "./bmp.h"
+
 #define N 8
 
 uint8_t** generateShadows(char *bmpFile, uint8_t k);
 
 void freeShadows(uint8_t **shadows);
+
+void freeSubShadows(uint8_t **subShadows, uint8_t k);
 
 #endif
