@@ -1,7 +1,4 @@
 #include <stdlib.h>
-#include <stdio.h>
-#include <dirent.h>
-#include <string.h>
 
 #include "./include/shadows.h"
 #include "./include/bmp.h"
@@ -67,53 +64,9 @@ uint8_t** generateShadows(char *bmpFile, uint8_t k) {
     return shadows;
 }
 
-uint8_t* extractSubShadow(char *imagePath, InsertionMode insertionMode, uint32_t t, uint16_t *shadowNumber) {
-    // (1) Extract vi,j = (mi,j, di,j), i = 1, 2, ... , t, j = 1, 2, ... , k from S1, S2, ... , Sk
-    BmpImage *image = bmpRead(imagePath);
-    printf("Reading image: %s \n", imagePath);
-
-    uint8_t shadowBitIndex = 0;
-    uint32_t shadowByteIndex = 0;
-    uint8_t *subShadows = calloc(2*t, sizeof(uint8_t));
-    uint32_t pixelsUsed = 2 * t * (insertionMode == LSB2 ? 4 : 2);
-    for (uint32_t i = 0; i < pixelsUsed ; i++) {
-        if (shadowBitIndex == 8) {
-            shadowBitIndex = 0;
-            shadowByteIndex++;
-        }
-        
-        if (insertionMode == LSB2) {
-            // Get last 2 bits
-            image->pixels[i] &= 0x03; // 0x03 = 0b00000011
-
-            // Mask to get certain pair of bits inside a byte (i.e 00110000 or 00001100)
-            uint8_t mask = 0x03 << (6 - shadowBitIndex);
-
-            // Add masked bits to the current v_i,j
-            subShadows[shadowByteIndex] |= (image->pixels[i] << (6 - shadowBitIndex)) & mask;
-            // printf("%d ",subShadows[shadowByteIndex]);
-            shadowBitIndex += 2;
-        } else if (insertionMode == LSB4) {
-            // Get last 4 bits
-            image->pixels[i] &= 0x0F; // 0x0F = 0b00001111
-
-            // Mask to get certain pair of bits inside a byte (i.e 11110000 or 00001111)
-            uint8_t mask = 0x0F << (4 - shadowBitIndex);
-
-            // Add masked bits to the current v_i,j
-            subShadows[shadowByteIndex] |= (image->pixels[i] << (4 - shadowBitIndex)) & mask;
-            shadowBitIndex += 4;
-        }
-    }
-    
-    *shadowNumber = image->header.reserved1;
-
-    bmpFree(image);
-
-    return subShadows;
-}
-
-void freeSubShadow(uint8_t *subShadows) {
+void freeSubShadows(uint8_t **subShadows, uint8_t k) {
+    for (uint32_t i = 0; i < k; i++)
+        free(subShadows[i]);
     free(subShadows);
 }
 

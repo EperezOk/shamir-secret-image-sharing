@@ -40,10 +40,13 @@ BmpImage *bmpRead(const char *filename);
 
 void bmpWrite(const char *filename, BmpImage *image);
 
-void createImageWithFunctions(char *image, Polynomial *f[], Polynomial *g[], uint32_t t, uint8_t k);
-
 void bmpFree(BmpImage *image);
 
 void embedShadow(const char *imagePath, InsertionMode mode, uint8_t *shadow, uint16_t shadowNumber);
+
+// Extract all the sub-shadows v_ij from a BMP image
+uint8_t* extractSubShadows(const char *imagePath, InsertionMode insertionMode, uint32_t t, uint16_t *shadowNumber);
+
+void recoverSecretImage(BmpImage *imagePath, Polynomial *f[], Polynomial *g[], uint32_t t, uint8_t k);
 
 #endif

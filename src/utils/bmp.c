@@ -116,29 +116,71 @@ void embedShadow(const char *imagePath, InsertionMode mode, uint8_t *shadow, uin
     bmpFree(image);
 }
 
-
-void createImageWithFunctions(char *imagePath, Polynomial *f[], Polynomial *g[], uint32_t t, uint8_t k) {
+uint8_t* extractSubShadows(const char *imagePath, InsertionMode insertionMode, uint32_t t, uint16_t *shadowNumber) {
     BmpImage *image = bmpRead(imagePath);
 
-    // Create block i and write to image
-    for (uint32_t i = 0; i < t; i++) {
-        uint8_t blockSize = 2 * k - 2;
-        uint8_t *block = malloc(sizeof(uint8_t) * blockSize);
-        // save a_i in block
-        for (uint8_t j = 0; j < k; j++) {
-            block[j] = f[i]->coefficients[j];
+    uint8_t shadowBitIndex = 0;
+    uint32_t shadowByteIndex = 0;
+
+    uint8_t *subShadows = calloc(2*t, sizeof(uint8_t));
+
+    uint32_t pixelsUsed = 2*t * (insertionMode == LSB2 ? 4 : 2);
+
+    for (uint32_t i = 0; i < pixelsUsed; i++) {
+        if (shadowBitIndex == 8) {
+            shadowBitIndex = 0;
+            shadowByteIndex++;
         }
+        
+        if (insertionMode == LSB2) {
+            // Get last 2 bits
+            image->pixels[i] &= 0x03; // 0x03 = 0b00000011
 
-        // save b_i in block
-        for (uint8_t j = 2; j < k; j++) {
-            block[j - 2 + k] = g[i]->coefficients[j]; // ignore b0 and b1
+            // Mask to get the current pair of bits inside a byte
+            uint8_t mask = 0x03 << (6 - shadowBitIndex);
+
+            // Set the current pair of bits in the current v_i,j
+            subShadows[shadowByteIndex] |= (image->pixels[i] << (6 - shadowBitIndex)) & mask;
+
+            shadowBitIndex += 2;
+        } else if (insertionMode == LSB4) {
+            // Get last 4 bits
+            image->pixels[i] &= 0x0F; // 0x0F = 0b00001111
+
+            // Mask to get the current half of bits inside a byte (11110000 or 00001111)
+            uint8_t mask = 0x0F << (4 - shadowBitIndex);
+
+            // Set the current half of bits in the current v_i,j
+            subShadows[shadowByteIndex] |= (image->pixels[i] << (4 - shadowBitIndex)) & mask;
+
+            shadowBitIndex += 4;
         }
-
-        memcpy(image->pixels + i * blockSize, block, blockSize);
-
-        free(block);
     }
+    
+    // Get the shadow number (i.e. the `j` used to evaluate `f` and `g` polynomials when created the shadow Sj for this image)
+    *shadowNumber = image->header.reserved1;
 
-    bmpWrite(imagePath, image);
     bmpFree(image);
+
+    return subShadows;
+}
+
+void recoverSecretImage(BmpImage *image, Polynomial *f[], Polynomial *g[], uint32_t t, uint8_t k) {
+    uint8_t blockSize = 2 * k - 2;
+    uint8_t block[blockSize];
+
+    // Reconstruct each of the t blocks B_i
+    for (uint32_t i = 0; i < t; i++) {
+
+        // Recover a_i
+        for (uint8_t j = 0; j < k; j++)
+            block[j] = f[i]->coefficients[j];
+
+        // Recover b_i
+        for (uint8_t j = 2; j < k; j++) // ignore b0 and b1
+            block[j - 2 + k] = g[i]->coefficients[j];
+
+        // Embed block in image
+        memcpy(image->pixels + i*blockSize, block, blockSize);
+    }
 }

@@ -11,8 +11,6 @@ uint8_t** generateShadows(char *bmpFile, uint8_t k);
 
 void freeShadows(uint8_t **shadows);
 
-uint8_t* extractSubShadow(char *imagePath, InsertionMode insertionMode, uint32_t t, uint16_t *shadowNumber);
-
-void freeSubShadow(uint8_t *subShadows);
+void freeSubShadows(uint8_t **subShadows, uint8_t k);
 
 #endif
