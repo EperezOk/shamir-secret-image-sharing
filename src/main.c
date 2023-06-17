@@ -15,7 +15,7 @@ void shadowGeneration(char *bmpFile, uint8_t k, char *bmpDirPath);
 
 int main(int argc, char *argv[]) {
     if (argc != 5) {
-        fprintf(stderr, "Usage: %s (r|d) <BmpPath> <k> <BmpEmbedDirectory>\n", argv[0]);
+        fprintf(stderr, "Usage: %s (r|d) <BmpSecret> <k> <BmpDirectory>\n", argv[0]);
         exit(EXIT_FAILURE);
     }
 
@@ -36,7 +36,7 @@ int main(int argc, char *argv[]) {
         shadowGeneration(bmpFile, k, bmpDirPath);
     }
     else {
-        fprintf(stderr, "Usage: %s (r|d) <BmpPath> <k> <BmpEmbedDirectory>\n", argv[0]);
+        fprintf(stderr, "Usage: %s (r|d) <BmpSecret> <k> <BmpDirectory>\n", argv[0]);
         exit(EXIT_FAILURE);
     }
 }
@@ -48,7 +48,7 @@ void imageReconstruction(char *secretImagePath, uint8_t k, char *bmpDirPath) {
     bmpDir = opendir(bmpDirPath);
 
     if (bmpDir == NULL) {
-        fprintf(stderr, "Error while opening directory %s.\n", bmpDirPath);
+        fprintf(stderr, "Error opening directory %s.\n", bmpDirPath);
         exit(EXIT_FAILURE);
     }
 
@@ -84,6 +84,14 @@ void imageReconstruction(char *secretImagePath, uint8_t k, char *bmpDirPath) {
             shadowNumbers[fileNumber] = shadowNumber;
             subShadows[fileNumber++] = subShadow;
         }
+    }
+
+    if (fileNumber < k) {
+        fprintf(stderr, "Error: not enough images in %s\n", bmpDirPath);
+        freeSubShadows(subShadows, fileNumber);
+        bmpFree(secretImage);
+        closedir(bmpDir);
+        exit(EXIT_FAILURE);
     }
 
     // (2) For each group of vi,1, vi,2, ... , vi,k, i ∈ [1, t], reconstruct fi(x) and gi(x) from mi,1, mi,2, ... , mi,k and di,1, di,2, ... , di,k using Lagrange interpolation.
@@ -138,7 +146,7 @@ void shadowGeneration(char *bmpFile, uint8_t k, char *bmpDirPath) {
     bmpDir = opendir(bmpDirPath);
 
     if (bmpDir == NULL) {
-        fprintf(stderr, "Error while opening directory %s.\n", bmpDirPath);
+        fprintf(stderr, "Error opening directory %s.\n", bmpDirPath);
         freeShadows(shadows);
         exit(EXIT_FAILURE);
     }
