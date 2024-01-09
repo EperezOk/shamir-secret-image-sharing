@@ -1,4 +1,4 @@
-# (k, n) secret image sharing scheme capable of cheating detection
+# Shamir's secret [image] sharing scheme capable of cheating detection
 
 This implementation is based on the paper located in `/docs/paper.pdf`.
 
